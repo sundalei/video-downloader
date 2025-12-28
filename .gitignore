@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+.DS_Store
+branch_protection_rules.json
+super-linter-summary.md
