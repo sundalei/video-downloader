@@ -36,6 +36,12 @@ jobs:
           JAVA_FILE_NAME: google_checks.xml
           FILTER_REGEX_EXCLUDE: ".*mvnw.*"
 
+      - name: Restore protected files
+        run: |
+          git restore github_conf/branch_protection_rules.json
+          # If the file is untracked (like the report), remove it
+          rm -rf super-linter-output/
+
       - name: Commit and push linting fixes
         if: >
           github.event_name == 'pull_request' &&
