@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/subscriptions")
 public class SubscriptionController {
 
-    @GetMapping("all")
-    public String listSubscriptions() {
-        return "Hello";
-    }
+  @GetMapping("all")
+  public String listSubscriptions() {
+    return "Hello";
+  }
 }
