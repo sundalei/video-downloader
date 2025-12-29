@@ -8,14 +8,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class SubscriptionService {
   private final DynamicRules dynamicRules;
   private final Config config;
+  private final RestTemplate restTemplate = new RestTemplate();
   private static final String API_URL = "https://onlyfans.com/api2/v2";
 
   public SubscriptionService(DynamicRules dynamicRules, Config config) {
@@ -33,6 +38,11 @@ public class SubscriptionService {
     Map<String, String> queryParams = builder.build().getQueryParams().toSingleValueMap();
 
     HttpHeaders headers = createSignedHeaders(endpoint, queryParams);
+    HttpEntity<?> entity = new HttpEntity<>(headers);
+
+    ResponseEntity<?> response =
+        restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, String.class);
+    System.out.println(response);
     System.out.println(headers);
   }
 
