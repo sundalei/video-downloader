@@ -1,20 +1,26 @@
 package com.example.service;
 
+import com.example.model.Config;
 import com.example.model.DynamicRules;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class SubscriptionService {
   private final DynamicRules dynamicRules;
+  private final Config config;
   private static final String API_URL = "https://onlyfans.com/api2/v2";
 
-  public SubscriptionService(DynamicRules dynamicRules) {
+  public SubscriptionService(DynamicRules dynamicRules, Config config) {
     this.dynamicRules = dynamicRules;
+    this.config = config;
   }
 
   public void listSubscriptions() {
@@ -26,11 +32,11 @@ public class SubscriptionService {
             .queryParam("type", "active");
     Map<String, String> queryParams = builder.build().getQueryParams().toSingleValueMap();
 
-    createSignedHeaders(endpoint, queryParams);
-    System.out.println(endpoint);
+    HttpHeaders headers = createSignedHeaders(endpoint, queryParams);
+    System.out.println(headers);
   }
 
-  private void createSignedHeaders(String path, Map<String, String> queryParams) {
+  private HttpHeaders createSignedHeaders(String path, Map<String, String> queryParams) {
     String fullPath = "/api2/v2" + path;
 
     String query = "";
@@ -42,10 +48,31 @@ public class SubscriptionService {
     }
 
     String unixtime = String.valueOf(Instant.now().getEpochSecond());
-    String message = String.join("\n", dynamicRules.toString(), "b");
-    System.out.println("message: " + message);
-    System.out.println("unixtime: " + unixtime);
-    System.out.println(fullPath);
-    System.out.println(queryParams);
+    String message =
+        String.join("\n", dynamicRules.getStaticParam(), unixtime, fullPath, config.getUserId());
+    String sha1Sign = DigestUtils.sha1Hex(message.getBytes(StandardCharsets.UTF_8));
+
+    byte[] sha1Bytes = sha1Sign.getBytes(StandardCharsets.US_ASCII);
+    int checksum = 0;
+    for (Integer idx : dynamicRules.getChecksumIndexes()) {
+      if (idx < sha1Bytes.length) {
+        checksum += sha1Bytes[idx];
+      }
+    }
+    checksum += dynamicRules.getChecksumConstant();
+
+    String sign = String.format(dynamicRules.getFormat(), sha1Sign, Math.abs(checksum));
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Accept", "application/json, text/plain, */*");
+    headers.set("app-token", config.getAppToken());
+    headers.set("User-Agent", config.getUserAgent());
+    headers.set("x-bc", config.getxBc());
+    headers.set("user-id", config.getUserId());
+    headers.set("Cookie", "auh_id=" + config.getUserId() + "; sess=" + config.getSessionCookie());
+    headers.set("sign", sign);
+    headers.set("time", unixtime);
+
+    return headers;
   }
 }
