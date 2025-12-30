@@ -42,28 +42,23 @@ public class SubscriptionService {
     Map<String, String> queryParams = builder.build().getQueryParams().toSingleValueMap();
     HttpHeaders headers = createSignedHeaders(endpoint, queryParams);
 
-    try {
-      ResponseEntity<JsonNode> response =
-          restClient
-              .get()
-              .uri(builder.toUriString())
-              .headers(h -> h.addAll(headers))
-              .retrieve()
-              .toEntity(JsonNode.class);
+    ResponseEntity<JsonNode> response =
+        restClient
+            .get()
+            .uri(builder.toUriString())
+            .headers(h -> h.addAll(headers))
+            .retrieve()
+            .toEntity(JsonNode.class);
 
-      List<String> usernames = new ArrayList<>();
-      if (response.getBody() != null && response.getBody().isArray()) {
-        for (JsonNode node : response.getBody()) {
-          if (node.has("username")) {
-            usernames.add(node.get("username").asString());
-          }
+    List<String> usernames = new ArrayList<>();
+    if (response.getBody() != null && response.getBody().isArray()) {
+      for (JsonNode node : response.getBody()) {
+        if (node.has("username")) {
+          usernames.add(node.get("username").asString());
         }
       }
-      return usernames;
-    } catch (Exception e) {
-      log.error("Network error: Failed to connect to API.");
-      throw new RuntimeException("Failed to fetch subscriptions", e);
     }
+    return usernames;
   }
 
   private HttpHeaders createSignedHeaders(String path, Map<String, String> queryParams) {

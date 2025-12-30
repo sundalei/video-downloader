@@ -1,10 +1,11 @@
 package com.example.config;
 
+import com.example.exception.UpstreamApiException;
+import com.example.exception.UpstreamServerException;
 import com.example.model.Config;
 import com.example.model.DynamicRules;
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.nio.charset.StandardCharsets;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -16,7 +17,6 @@ import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 public class AppConfig {
-  private static final Logger log = LoggerFactory.getLogger(AppConfig.class);
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Bean
@@ -24,9 +24,17 @@ public class AppConfig {
     return builder
         .requestFactory(new HttpComponentsClientHttpRequestFactory())
         .defaultStatusHandler(
-            HttpStatusCode::isError,
+            HttpStatusCode::is4xxClientError,
             (request, response) -> {
-              log.error("API Error Status: {}", response.getStatusCode());
+              String body = new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8);
+              // Throw custom exception with the upstream error message
+              throw new UpstreamApiException(body, response.getStatusCode().value());
+            })
+        .defaultStatusHandler(
+            HttpStatusCode::is5xxServerError,
+            (request, response) -> {
+              throw new UpstreamServerException(
+                  "Upstream server error: " + response.getStatusText());
             })
         .build();
   }
