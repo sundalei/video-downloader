@@ -17,7 +17,11 @@ import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 public class AppConfig {
-  private final ObjectMapper objectMapper = new ObjectMapper();
+
+  @Bean
+  ObjectMapper objectMapper() {
+    return new ObjectMapper();
+  }
 
   @Bean
   RestClient restClient(RestClient.Builder builder) {
@@ -40,13 +44,13 @@ public class AppConfig {
   }
 
   @Bean
-  DynamicRules dynamicRules() throws IOException {
+  DynamicRules dynamicRules(ObjectMapper objectMapper) throws IOException {
     Resource resource = new ClassPathResource("dynamic_rules.json");
     return objectMapper.readValue(resource.getInputStream(), DynamicRules.class);
   }
 
   @Bean
-  Config config() throws IOException {
+  Config config(ObjectMapper objectMapper) throws IOException {
     Resource resource = new ClassPathResource("config.json");
     return objectMapper.readValue(resource.getInputStream(), Config.class);
   }

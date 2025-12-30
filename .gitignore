@@ -37,3 +37,4 @@ super-linter-summary.md
 src/main/resources/config.json
 .gitignore
 src/main/resources/dynamic_rules.json
+posts_retrieval_*.txt
