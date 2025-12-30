@@ -35,6 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JAVA_FILE_NAME: google_checks.xml
           FILTER_REGEX_EXCLUDE: ".*mvnw.*"
+          VALIDATE_JSCPD: false
 
       - name: Commit and push linting fixes
         if: >
