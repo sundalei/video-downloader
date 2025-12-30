@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.service.SubscriptionService;
+import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,8 +17,7 @@ public class SubscriptionController {
   }
 
   @GetMapping("all")
-  public String listSubscriptions() {
-    subscriptionService.listSubscriptions();
-    return "Hello";
+  public List<String> listSubscriptions() {
+    return subscriptionService.listSubscriptions();
   }
 }

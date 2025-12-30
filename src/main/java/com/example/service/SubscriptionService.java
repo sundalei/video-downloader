@@ -8,27 +8,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.http.HttpEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import tools.jackson.databind.JsonNode;
 
 @Service
 public class SubscriptionService {
+  private static final Logger log = LoggerFactory.getLogger(SubscriptionService.class);
+
   private final DynamicRules dynamicRules;
   private final Config config;
-  private final RestTemplate restTemplate = new RestTemplate();
+  private final RestClient restClient;
   private static final String API_URL = "https://onlyfans.com/api2/v2";
 
-  public SubscriptionService(DynamicRules dynamicRules, Config config) {
+  public SubscriptionService(DynamicRules dynamicRules, Config config, RestClient restClient) {
     this.dynamicRules = dynamicRules;
     this.config = config;
+    this.restClient = restClient;
   }
 
-  public void listSubscriptions() {
+  public List<String> listSubscriptions() {
     final String endpoint = "/subscriptions/subscribes";
     UriComponentsBuilder builder =
         UriComponentsBuilder.fromUriString(API_URL + endpoint)
@@ -36,14 +40,30 @@ public class SubscriptionService {
             .queryParam("order", "publish_date_asc")
             .queryParam("type", "active");
     Map<String, String> queryParams = builder.build().getQueryParams().toSingleValueMap();
-
     HttpHeaders headers = createSignedHeaders(endpoint, queryParams);
-    HttpEntity<?> entity = new HttpEntity<>(headers);
 
-    ResponseEntity<?> response =
-        restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, String.class);
-    System.out.println(response);
-    System.out.println(headers);
+    try {
+      ResponseEntity<JsonNode> response =
+          restClient
+              .get()
+              .uri(builder.toUriString())
+              .headers(h -> h.addAll(headers))
+              .retrieve()
+              .toEntity(JsonNode.class);
+
+      List<String> usernames = new ArrayList<>();
+      if (response.getBody() != null && response.getBody().isArray()) {
+        for (JsonNode node : response.getBody()) {
+          if (node.has("username")) {
+            usernames.add(node.get("username").asString());
+          }
+        }
+      }
+      return usernames;
+    } catch (Exception e) {
+      log.error("Network error: Failed to connect to API.");
+      throw new RuntimeException("Failed to fetch subscriptions", e);
+    }
   }
 
   private HttpHeaders createSignedHeaders(String path, Map<String, String> queryParams) {
