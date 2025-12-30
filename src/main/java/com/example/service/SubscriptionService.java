@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,8 +17,6 @@ import tools.jackson.databind.JsonNode;
 
 @Service
 public class SubscriptionService {
-  private static final Logger log = LoggerFactory.getLogger(SubscriptionService.class);
-
   private final DynamicRules dynamicRules;
   private final Config config;
   private final RestClient restClient;
