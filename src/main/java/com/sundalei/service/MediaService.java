@@ -1,5 +1,7 @@
 package com.sundalei.service;
 
+import com.sundalei.dto.PostUrlResponse;
+import com.sundalei.model.Post;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -15,10 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import com.sundalei.dto.PostUrlResponse;
-import com.sundalei.model.Post;
-
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -93,12 +91,13 @@ public class MediaService {
     Map<String, String> queryParams = Collections.emptyMap();
     HttpHeaders headers = apiAuthService.createSignedHeaders(endpoint, queryParams);
 
-    ResponseEntity<JsonNode> response = restClient
-        .get()
-        .uri(API_URL + endpoint)
-        .headers(h -> h.addAll(headers))
-        .retrieve()
-        .toEntity(JsonNode.class);
+    ResponseEntity<JsonNode> response =
+        restClient
+            .get()
+            .uri(API_URL + endpoint)
+            .headers(h -> h.addAll(headers))
+            .retrieve()
+            .toEntity(JsonNode.class);
 
     return response.getBody();
   }
@@ -120,13 +119,15 @@ public class MediaService {
     }
 
     while (true) {
-      UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(API_URL + endpoint)
-          .queryParam("limit", "50")
-          .queryParam("order", "publish_date_asc");
+      UriComponentsBuilder builder =
+          UriComponentsBuilder.fromUriString(API_URL + endpoint)
+              .queryParam("limit", "50")
+              .queryParam("order", "publish_date_asc");
 
       // Use initial afterPublishTime for first request, then pagination cursor for
       // subsequent
-      String afterPublishTime = (paginationCursor != null) ? paginationCursor : initialAfterPublishTime;
+      String afterPublishTime =
+          (paginationCursor != null) ? paginationCursor : initialAfterPublishTime;
       if (afterPublishTime != null) {
         builder.queryParam("afterPublishTime", afterPublishTime);
       }
@@ -140,12 +141,13 @@ public class MediaService {
 
       }
 
-      ResponseEntity<JsonNode> response = restClient
-          .get()
-          .uri(builder.toUriString())
-          .headers(h -> h.addAll(headers))
-          .retrieve()
-          .toEntity(JsonNode.class);
+      ResponseEntity<JsonNode> response =
+          restClient
+              .get()
+              .uri(builder.toUriString())
+              .headers(h -> h.addAll(headers))
+              .retrieve()
+              .toEntity(JsonNode.class);
 
       JsonNode body = response.getBody();
       List<Post> pagePosts = new ArrayList<>();

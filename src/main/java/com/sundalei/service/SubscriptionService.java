@@ -23,19 +23,21 @@ public class SubscriptionService {
 
   public List<String> listSubscriptions() {
     final String endpoint = "/subscriptions/subscribes";
-    UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(API_URL + endpoint)
-        .queryParam("limit", "50")
-        .queryParam("order", "publish_date_asc")
-        .queryParam("type", "active");
+    UriComponentsBuilder builder =
+        UriComponentsBuilder.fromUriString(API_URL + endpoint)
+            .queryParam("limit", "50")
+            .queryParam("order", "publish_date_asc")
+            .queryParam("type", "active");
     Map<String, String> queryParams = builder.build().getQueryParams().toSingleValueMap();
     HttpHeaders headers = apiAuthService.createSignedHeaders(endpoint, queryParams);
 
-    ResponseEntity<JsonNode> response = restClient
-        .get()
-        .uri(builder.toUriString())
-        .headers(h -> h.addAll(headers))
-        .retrieve()
-        .toEntity(JsonNode.class);
+    ResponseEntity<JsonNode> response =
+        restClient
+            .get()
+            .uri(builder.toUriString())
+            .headers(h -> h.addAll(headers))
+            .retrieve()
+            .toEntity(JsonNode.class);
 
     List<String> usernames = new ArrayList<>();
     if (response.getBody() != null && response.getBody().isArray()) {
