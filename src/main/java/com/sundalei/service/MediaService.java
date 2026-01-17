@@ -1,5 +1,7 @@
 package com.sundalei.service;
 
+import com.sundalei.config.ApiConfig;
+import com.sundalei.constant.ApiConstants;
 import com.sundalei.dto.PostUrlResponse;
 import com.sundalei.model.Post;
 import java.io.FileWriter;
@@ -24,17 +26,21 @@ import tools.jackson.databind.ObjectMapper;
 public class MediaService {
 
   private static final Logger log = LoggerFactory.getLogger(MediaService.class);
-  private static final String API_URL = "https://onlyfans.com/api2/v2";
+  private final ApiConfig apiConfig;
 
   private final RestClient restClient;
   private final ApiAuthService apiAuthService;
   private final ObjectMapper objectMapper;
 
   public MediaService(
-      RestClient restClient, ApiAuthService apiAuthService, ObjectMapper objectMapper) {
+      RestClient restClient,
+      ApiAuthService apiAuthService,
+      ObjectMapper objectMapper,
+      ApiConfig apiConfig) {
     this.restClient = restClient;
     this.apiAuthService = apiAuthService;
     this.objectMapper = objectMapper;
+    this.apiConfig = apiConfig;
   }
 
   public List<PostUrlResponse> listMediaContents(String profile, Long daysOld) {
@@ -49,7 +55,7 @@ public class MediaService {
     String userId = userInfo.get("id").asString();
     log.info("Found user ID: {}", userId);
 
-    String endpoint = "/users/" + userId + "/posts";
+    String endpoint = String.format(ApiConstants.ENDPOINT_USER_POSTS, userId);
 
     // Get all posts with pagination
     List<Post> posts = getAllPosts(endpoint, daysOld);
@@ -87,14 +93,14 @@ public class MediaService {
   }
 
   private JsonNode getUserInfo(String profile) {
-    String endpoint = "/users/" + profile;
+    String endpoint = String.format(ApiConstants.ENDPOINT_USER_INFO, profile);
     Map<String, String> queryParams = Collections.emptyMap();
     HttpHeaders headers = apiAuthService.createSignedHeaders(endpoint, queryParams);
 
     ResponseEntity<JsonNode> response =
         restClient
             .get()
-            .uri(API_URL + endpoint)
+            .uri(apiConfig.baseUrl() + endpoint)
             .headers(h -> h.addAll(headers))
             .retrieve()
             .toEntity(JsonNode.class);
@@ -120,7 +126,7 @@ public class MediaService {
 
     while (true) {
       UriComponentsBuilder builder =
-          UriComponentsBuilder.fromUriString(API_URL + endpoint)
+          UriComponentsBuilder.fromUriString(apiConfig.baseUrl() + endpoint)
               .queryParam("limit", "50")
               .queryParam("order", "publish_date_asc");
 

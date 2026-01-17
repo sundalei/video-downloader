@@ -2,8 +2,8 @@ package com.sundalei.config;
 
 import com.sundalei.exception.UpstreamApiException;
 import com.sundalei.exception.UpstreamServerException;
-import com.sundalei.model.Config;
-import com.sundalei.model.DynamicRules;
+import com.sundalei.model.SigningRules;
+import com.sundalei.model.UserCredentials;
 import java.nio.charset.StandardCharsets;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +13,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-@EnableConfigurationProperties({Config.class, DynamicRules.class})
+@EnableConfigurationProperties({UserCredentials.class, SigningRules.class, ApiConfig.class})
 public class AppConfig {
 
   @Bean

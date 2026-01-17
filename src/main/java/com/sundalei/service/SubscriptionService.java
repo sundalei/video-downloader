@@ -1,5 +1,7 @@
 package com.sundalei.service;
 
+import com.sundalei.config.ApiConfig;
+import com.sundalei.constant.ApiConstants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,17 +16,19 @@ import tools.jackson.databind.JsonNode;
 public class SubscriptionService {
   private final RestClient restClient;
   private final ApiAuthService apiAuthService;
-  private static final String API_URL = "https://onlyfans.com/api2/v2";
+  private final ApiConfig apiConfig;
 
-  public SubscriptionService(RestClient restClient, ApiAuthService apiAuthService) {
+  public SubscriptionService(
+      RestClient restClient, ApiAuthService apiAuthService, ApiConfig apiConfig) {
     this.restClient = restClient;
     this.apiAuthService = apiAuthService;
+    this.apiConfig = apiConfig;
   }
 
   public List<String> listSubscriptions() {
-    final String endpoint = "/subscriptions/subscribes";
+    final String endpoint = ApiConstants.ENDPOINT_SUBSCRIPTIONS;
     UriComponentsBuilder builder =
-        UriComponentsBuilder.fromUriString(API_URL + endpoint)
+        UriComponentsBuilder.fromUriString(apiConfig.baseUrl() + endpoint)
             .queryParam("limit", "50")
             .queryParam("order", "publish_date_asc")
             .queryParam("type", "active");
