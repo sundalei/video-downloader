@@ -4,14 +4,14 @@ spring:
 
 app:
   config:
-    user-id: "8101981"
-    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.2 Safari/605.1.15"
-    "x-bc": "00f4de73dab20cf4ffa822ead0f428686016f0b6"
-    "sess": "iq6gh6sp8nd6nopvma0shuqpau"
-    "app-token": "33d57ade8c02dbc5a333db99ff9ae26a"
+    user-id: "YOUR_USER_ID"
+    "user-agent": "YOUR_USER_AGENT"
+    "x-bc": "YOUR_XBC_TOKEN"
+    "sess": "YOUR_SESSION_COOKIE"
+    "app-token": "YOUR_APP_TOKEN"
 
   rules:
-    static-param: "7HMjX3tp4B4JJDOryHAMCUIQCtmGq69D"
-    checksum-indexes: [15,35,3,7,21,26,39,35,4,0,6,29,35,28,37,27,22,4,9,10,37,21,27,13,17,31,28,24,0,14,9,0]
-    checksum-constant: 53
-    format: "51892:%s:%x:69406376"
+    static-param: "YOUR_STATIC_PARAM"
+    checksum-indexes: []
+    checksum-constant: 0
+    format: "YOUR_FORMAT"

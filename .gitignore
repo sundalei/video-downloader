@@ -34,7 +34,8 @@ build/
 .DS_Store
 branch_protection_rules.json
 super-linter-summary.md
-src/main/resources/config.json
 .gitignore
-src/main/resources/dynamic_rules.json
 posts_retrieval_*.txt
+
+### Local Secrets ###
+application-local.yaml
