@@ -8,13 +8,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class PracticeConfig {
 
-    @Bean
-    public RequestInterceptor practiceInterceptor() {
-        return new PracticeInterceptor();
-    }
+  @Bean
+  public RequestInterceptor practiceInterceptor() {
+    return new PracticeInterceptor();
+  }
 
-    @Bean
-    public ErrorDecoder practiceErrorDecoder() {
-        return new PracticeErrorDecoder();
-    }
+  @Bean
+  public ErrorDecoder practiceErrorDecoder() {
+    return new PracticeErrorDecoder();
+  }
 }
