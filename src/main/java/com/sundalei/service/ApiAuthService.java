@@ -5,15 +5,15 @@ import com.sundalei.model.SigningRules;
 import com.sundalei.model.UserCredentials;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ApiAuthService {
+
   private final SigningRules signingRules;
   private final UserCredentials userCredentials;
 
@@ -25,11 +25,11 @@ public class ApiAuthService {
   public HttpHeaders createSignedHeaders(String path, Map<String, String> queryParams) {
     String fullPath = ApiConstants.API_V2_PATH + path;
 
-    String query = "";
     if (queryParams != null && !queryParams.isEmpty()) {
-      List<String> pairs = new ArrayList<>();
-      queryParams.forEach((k, v) -> pairs.add(k + "=" + v));
-      query = String.join("&", pairs);
+      String query =
+          queryParams.entrySet().stream()
+              .map(entry -> entry.getKey() + "=" + entry.getValue())
+              .collect(Collectors.joining("&"));
       fullPath = fullPath + "?" + query;
     }
 
@@ -39,13 +39,12 @@ public class ApiAuthService {
     String sha1Sign = DigestUtils.sha1Hex(message.getBytes(StandardCharsets.UTF_8));
 
     byte[] sha1Bytes = sha1Sign.getBytes(StandardCharsets.US_ASCII);
-    int checksum = 0;
-    for (Integer idx : signingRules.checksumIndexes()) {
-      if (idx < sha1Bytes.length) {
-        checksum += sha1Bytes[idx];
-      }
-    }
-    checksum += signingRules.checksumConstant();
+    int checksum =
+        signingRules.checksumIndexes().stream()
+                .filter(idx -> idx < sha1Bytes.length)
+                .mapToInt(idx -> sha1Bytes[idx])
+                .sum()
+            + signingRules.checksumConstant();
 
     String sign = String.format(signingRules.format(), sha1Sign, Math.abs(checksum));
 
