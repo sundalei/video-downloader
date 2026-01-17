@@ -1,4 +1,4 @@
-package com.example.dto;
+package com.sundalei.dto;
 
 public class PostUrlResponse {
   private String postedAt;

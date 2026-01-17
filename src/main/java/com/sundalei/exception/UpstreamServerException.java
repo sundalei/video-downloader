@@ -1,4 +1,4 @@
-package com.example.exception;
+package com.sundalei.exception;
 
 public class UpstreamServerException extends RuntimeException {
   public UpstreamServerException(String message) {

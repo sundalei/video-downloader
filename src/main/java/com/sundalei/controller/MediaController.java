@@ -1,7 +1,7 @@
-package com.example.controller;
+package com.sundalei.controller;
 
-import com.example.dto.PostUrlResponse;
-import com.example.service.MediaService;
+import com.sundalei.dto.PostUrlResponse;
+import com.sundalei.service.MediaService;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

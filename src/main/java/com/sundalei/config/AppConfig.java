@@ -1,9 +1,9 @@
-package com.example.config;
+package com.sundalei.config;
 
-import com.example.exception.UpstreamApiException;
-import com.example.exception.UpstreamServerException;
-import com.example.model.Config;
-import com.example.model.DynamicRules;
+import com.sundalei.exception.UpstreamApiException;
+import com.sundalei.exception.UpstreamServerException;
+import com.sundalei.model.Config;
+import com.sundalei.model.DynamicRules;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.springframework.context.annotation.Bean;

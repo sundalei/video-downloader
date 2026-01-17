@@ -1,4 +1,4 @@
-package com.example.exception;
+package com.sundalei.exception;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -39,6 +39,6 @@ public class GlobalExceptionHandler {
             Map.of(
                 "error", "Connection Failed",
                 "message",
-                    "Unable to establish connection to provider. Possible IP block or timeout."));
+                "Unable to establish connection to provider. Possible IP block or timeout."));
   }
 }
