@@ -1,7 +1,7 @@
-package com.example.service;
+package com.sundalei.service;
 
-import com.example.model.Config;
-import com.example.model.DynamicRules;
+import com.sundalei.model.Config;
+import com.sundalei.model.DynamicRules;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -34,27 +34,27 @@ public class ApiAuthService {
 
     String unixtime = String.valueOf(Instant.now().getEpochSecond());
     String message =
-        String.join("\n", dynamicRules.getStaticParam(), unixtime, fullPath, config.getUserId());
+        String.join("\n", dynamicRules.staticParam(), unixtime, fullPath, config.userId());
     String sha1Sign = DigestUtils.sha1Hex(message.getBytes(StandardCharsets.UTF_8));
 
     byte[] sha1Bytes = sha1Sign.getBytes(StandardCharsets.US_ASCII);
     int checksum = 0;
-    for (Integer idx : dynamicRules.getChecksumIndexes()) {
+    for (Integer idx : dynamicRules.checksumIndexes()) {
       if (idx < sha1Bytes.length) {
         checksum += sha1Bytes[idx];
       }
     }
-    checksum += dynamicRules.getChecksumConstant();
+    checksum += dynamicRules.checksumConstant();
 
-    String sign = String.format(dynamicRules.getFormat(), sha1Sign, Math.abs(checksum));
+    String sign = String.format(dynamicRules.format(), sha1Sign, Math.abs(checksum));
 
     HttpHeaders headers = new HttpHeaders();
     headers.set("Accept", "application/json, text/plain, */*");
-    headers.set("app-token", config.getAppToken());
-    headers.set("User-Agent", config.getUserAgent());
-    headers.set("x-bc", config.getxBc());
-    headers.set("user-id", config.getUserId());
-    headers.set("Cookie", "auh_id=" + config.getUserId() + "; sess=" + config.getSessionCookie());
+    headers.set("app-token", config.appToken());
+    headers.set("User-Agent", config.userAgent());
+    headers.set("x-bc", config.xBc());
+    headers.set("user-id", config.userId());
+    headers.set("Cookie", "auh_id=" + config.userId() + "; sess=" + config.sessionCookie());
     headers.set("sign", sign);
     headers.set("time", unixtime);
 

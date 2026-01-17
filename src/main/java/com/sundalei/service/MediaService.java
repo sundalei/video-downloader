@@ -1,7 +1,7 @@
-package com.example.service;
+package com.sundalei.service;
 
-import com.example.dto.PostUrlResponse;
-import com.example.model.Post;
+import com.sundalei.dto.PostUrlResponse;
+import com.sundalei.model.Post;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -74,7 +74,7 @@ public class MediaService {
     // Convert each post to the simplified format
     for (Post post : postsToReturn) {
       if (post.isCanViewMedia() && post.getMedia() != null) {
-        for (com.example.model.Media media : post.getMedia()) {
+        for (com.sundalei.model.Media media : post.getMedia()) {
           if (media.isCanView() && media.getFiles() != null && media.getFiles().getFull() != null) {
             simplifiedPosts.add(
                 new PostUrlResponse(post.getPostedAt(), media.getFiles().getFull().getUrl()));
@@ -124,7 +124,8 @@ public class MediaService {
               .queryParam("limit", "50")
               .queryParam("order", "publish_date_asc");
 
-      // Use initial afterPublishTime for first request, then pagination cursor for subsequent
+      // Use initial afterPublishTime for first request, then pagination cursor for
+      // subsequent
       String afterPublishTime =
           (paginationCursor != null) ? paginationCursor : initialAfterPublishTime;
       if (afterPublishTime != null) {

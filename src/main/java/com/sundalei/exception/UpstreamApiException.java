@@ -1,4 +1,4 @@
-package com.example.exception;
+package com.sundalei.exception;
 
 public class UpstreamApiException extends RuntimeException {
   private final int statusCode;

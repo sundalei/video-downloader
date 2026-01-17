@@ -1,6 +1,6 @@
-package com.example.controller;
+package com.sundalei.controller;
 
-import com.example.service.SubscriptionService;
+import com.sundalei.service.SubscriptionService;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
