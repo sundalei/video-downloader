@@ -1,10 +1,8 @@
 package com.sundalei.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
+@ConfigurationProperties(prefix = "app.rules")
 public record DynamicRules(
-    @JsonProperty("static_param") String staticParam,
-    @JsonProperty("checksum_indexes") List<Integer> checksumIndexes,
-    @JsonProperty("checksum_constant") Integer checksumConstant,
-    @JsonProperty("format") String format) {}
+    String staticParam, List<Integer> checksumIndexes, Integer checksumConstant, String format) {}
