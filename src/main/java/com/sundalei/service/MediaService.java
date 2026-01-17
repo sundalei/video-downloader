@@ -1,6 +1,8 @@
 package com.sundalei.service;
 
+import com.sundalei.client.ApiClient;
 import com.sundalei.dto.PostUrlResponse;
+import com.sundalei.model.Media;
 import com.sundalei.model.Post;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,14 +11,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriComponentsBuilder;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -24,16 +21,11 @@ import tools.jackson.databind.ObjectMapper;
 public class MediaService {
 
   private static final Logger log = LoggerFactory.getLogger(MediaService.class);
-  private static final String API_URL = "https://onlyfans.com/api2/v2";
-
-  private final RestClient restClient;
-  private final ApiAuthService apiAuthService;
+  private final ApiClient apiClient;
   private final ObjectMapper objectMapper;
 
-  public MediaService(
-      RestClient restClient, ApiAuthService apiAuthService, ObjectMapper objectMapper) {
-    this.restClient = restClient;
-    this.apiAuthService = apiAuthService;
+  public MediaService(ApiClient apiClient, ObjectMapper objectMapper) {
+    this.apiClient = apiClient;
     this.objectMapper = objectMapper;
   }
 
@@ -49,10 +41,8 @@ public class MediaService {
     String userId = userInfo.get("id").asString();
     log.info("Found user ID: {}", userId);
 
-    String endpoint = "/users/" + userId + "/posts";
-
     // Get all posts with pagination
-    List<Post> posts = getAllPosts(endpoint, daysOld);
+    List<Post> posts = getAllPosts(userId, daysOld);
     log.info("Found {} posts for {}", posts.size(), profile);
 
     // Save posts to file
@@ -74,7 +64,7 @@ public class MediaService {
     // Convert each post to the simplified format
     for (Post post : postsToReturn) {
       if (post.isCanViewMedia() && post.getMedia() != null) {
-        for (com.sundalei.model.Media media : post.getMedia()) {
+        for (Media media : post.getMedia()) {
           if (media.isCanView() && media.getFiles() != null && media.getFiles().getFull() != null) {
             simplifiedPosts.add(
                 new PostUrlResponse(post.getPostedAt(), media.getFiles().getFull().getUrl()));
@@ -87,22 +77,10 @@ public class MediaService {
   }
 
   private JsonNode getUserInfo(String profile) {
-    String endpoint = "/users/" + profile;
-    Map<String, String> queryParams = Collections.emptyMap();
-    HttpHeaders headers = apiAuthService.createSignedHeaders(endpoint, queryParams);
-
-    ResponseEntity<JsonNode> response =
-        restClient
-            .get()
-            .uri(API_URL + endpoint)
-            .headers(h -> h.addAll(headers))
-            .retrieve()
-            .toEntity(JsonNode.class);
-
-    return response.getBody();
+    return apiClient.getUserInfo(profile);
   }
 
-  private List<Post> getAllPosts(String endpoint, Long daysOld) {
+  private List<Post> getAllPosts(String userId, Long daysOld) {
     List<Post> allPosts = new ArrayList<>();
     int limit = 50;
     String paginationCursor = null; // Used for pagination cursor
@@ -119,21 +97,10 @@ public class MediaService {
     }
 
     while (true) {
-      UriComponentsBuilder builder =
-          UriComponentsBuilder.fromUriString(API_URL + endpoint)
-              .queryParam("limit", "50")
-              .queryParam("order", "publish_date_asc");
-
       // Use initial afterPublishTime for first request, then pagination cursor for
       // subsequent
       String afterPublishTime =
           (paginationCursor != null) ? paginationCursor : initialAfterPublishTime;
-      if (afterPublishTime != null) {
-        builder.queryParam("afterPublishTime", afterPublishTime);
-      }
-
-      Map<String, String> queryParams = builder.build().getQueryParams().toSingleValueMap();
-      HttpHeaders headers = apiAuthService.createSignedHeaders(endpoint, queryParams);
 
       try {
         Thread.sleep(200);
@@ -141,15 +108,7 @@ public class MediaService {
 
       }
 
-      ResponseEntity<JsonNode> response =
-          restClient
-              .get()
-              .uri(builder.toUriString())
-              .headers(h -> h.addAll(headers))
-              .retrieve()
-              .toEntity(JsonNode.class);
-
-      JsonNode body = response.getBody();
+      JsonNode body = apiClient.getPosts(userId, limit, "publish_date_asc", afterPublishTime);
       List<Post> pagePosts = new ArrayList<>();
 
       if (body != null) {

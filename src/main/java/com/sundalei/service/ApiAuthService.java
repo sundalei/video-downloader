@@ -1,62 +1,64 @@
 package com.sundalei.service;
 
-import com.sundalei.model.Config;
-import com.sundalei.model.DynamicRules;
+import com.sundalei.constant.ApiConstants;
+import com.sundalei.model.SigningRules;
+import com.sundalei.model.UserCredentials;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ApiAuthService {
-  private final DynamicRules dynamicRules;
-  private final Config config;
 
-  public ApiAuthService(DynamicRules dynamicRules, Config config) {
-    this.dynamicRules = dynamicRules;
-    this.config = config;
+  private final SigningRules signingRules;
+  private final UserCredentials userCredentials;
+
+  public ApiAuthService(SigningRules signingRules, UserCredentials userCredentials) {
+    this.signingRules = signingRules;
+    this.userCredentials = userCredentials;
   }
 
   public HttpHeaders createSignedHeaders(String path, Map<String, String> queryParams) {
-    String fullPath = "/api2/v2" + path;
+    String fullPath = ApiConstants.API_V2_PATH + path;
 
-    String query = "";
     if (queryParams != null && !queryParams.isEmpty()) {
-      List<String> pairs = new ArrayList<>();
-      queryParams.forEach((k, v) -> pairs.add(k + "=" + v));
-      query = String.join("&", pairs);
+      String query =
+          queryParams.entrySet().stream()
+              .map(entry -> entry.getKey() + "=" + entry.getValue())
+              .collect(Collectors.joining("&"));
       fullPath = fullPath + "?" + query;
     }
 
     String unixtime = String.valueOf(Instant.now().getEpochSecond());
     String message =
-        String.join("\n", dynamicRules.staticParam(), unixtime, fullPath, config.userId());
+        String.join("\n", signingRules.staticParam(), unixtime, fullPath, userCredentials.userId());
     String sha1Sign = DigestUtils.sha1Hex(message.getBytes(StandardCharsets.UTF_8));
 
     byte[] sha1Bytes = sha1Sign.getBytes(StandardCharsets.US_ASCII);
-    int checksum = 0;
-    for (Integer idx : dynamicRules.checksumIndexes()) {
-      if (idx < sha1Bytes.length) {
-        checksum += sha1Bytes[idx];
-      }
-    }
-    checksum += dynamicRules.checksumConstant();
+    int checksum =
+        signingRules.checksumIndexes().stream()
+                .filter(idx -> idx < sha1Bytes.length)
+                .mapToInt(idx -> sha1Bytes[idx])
+                .sum()
+            + signingRules.checksumConstant();
 
-    String sign = String.format(dynamicRules.format(), sha1Sign, Math.abs(checksum));
+    String sign = String.format(signingRules.format(), sha1Sign, Math.abs(checksum));
 
     HttpHeaders headers = new HttpHeaders();
-    headers.set("Accept", "application/json, text/plain, */*");
-    headers.set("app-token", config.appToken());
-    headers.set("User-Agent", config.userAgent());
-    headers.set("x-bc", config.xBc());
-    headers.set("user-id", config.userId());
-    headers.set("Cookie", "auh_id=" + config.userId() + "; sess=" + config.sess());
-    headers.set("sign", sign);
-    headers.set("time", unixtime);
+    headers.set(ApiConstants.HEADER_ACCEPT, "application/json, text/plain, */*");
+    headers.set(ApiConstants.HEADER_APP_TOKEN, userCredentials.appToken());
+    headers.set(ApiConstants.HEADER_USER_AGENT, userCredentials.userAgent());
+    headers.set(ApiConstants.HEADER_X_BC, userCredentials.xBcToken());
+    headers.set(ApiConstants.HEADER_USER_ID, userCredentials.userId());
+    headers.set(
+        ApiConstants.HEADER_COOKIE,
+        "auh_id=" + userCredentials.userId() + "; sess=" + userCredentials.sess());
+    headers.set(ApiConstants.HEADER_SIGN, sign);
+    headers.set(ApiConstants.HEADER_TIME, unixtime);
 
     return headers;
   }

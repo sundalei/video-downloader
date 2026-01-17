@@ -5,13 +5,16 @@ spring:
 app:
   config:
     user-id: "YOUR_USER_ID"
-    "user-agent": "YOUR_USER_AGENT"
-    "x-bc": "YOUR_XBC_TOKEN"
-    "sess": "YOUR_SESSION_COOKIE"
-    "app-token": "YOUR_APP_TOKEN"
+    user-agent: "YOUR_USER_AGENT"
+    x-bc-token: "YOUR_XBC_TOKEN"
+    sess: "YOUR_SESSION_COOKIE"
+    app-token: "YOUR_APP_TOKEN"
 
   rules:
     static-param: "YOUR_STATIC_PARAM"
     checksum-indexes: []
     checksum-constant: 0
     format: "YOUR_FORMAT"
+
+  api:
+    base-url: "BASE_URL"

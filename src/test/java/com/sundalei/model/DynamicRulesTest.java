@@ -12,9 +12,9 @@ class DynamicRulesTest {
   @Test
   void testFormatStringCompatibility() throws IOException {
     ObjectMapper mapper = new ObjectMapper();
-    DynamicRules rules =
+    SigningRules rules =
         mapper.readValue(
-            new ClassPathResource("dynamic_rules.json").getInputStream(), DynamicRules.class);
+            new ClassPathResource("dynamic_rules.json").getInputStream(), SigningRules.class);
 
     String format = rules.format();
     assertThat(format).isNotNull();
