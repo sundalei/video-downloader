@@ -4,24 +4,17 @@ import com.sundalei.exception.UpstreamApiException;
 import com.sundalei.exception.UpstreamServerException;
 import com.sundalei.model.Config;
 import com.sundalei.model.DynamicRules;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
-import tools.jackson.databind.ObjectMapper;
 
 @Configuration
+@EnableConfigurationProperties({Config.class, DynamicRules.class})
 public class AppConfig {
-
-  @Bean
-  ObjectMapper objectMapper() {
-    return new ObjectMapper();
-  }
 
   @Bean
   RestClient restClient(RestClient.Builder builder) {
@@ -41,17 +34,5 @@ public class AppConfig {
                   "Upstream server error: " + response.getStatusText());
             })
         .build();
-  }
-
-  @Bean
-  DynamicRules dynamicRules(ObjectMapper objectMapper) throws IOException {
-    Resource resource = new ClassPathResource("dynamic_rules.json");
-    return objectMapper.readValue(resource.getInputStream(), DynamicRules.class);
-  }
-
-  @Bean
-  Config config(ObjectMapper objectMapper) throws IOException {
-    Resource resource = new ClassPathResource("config.json");
-    return objectMapper.readValue(resource.getInputStream(), Config.class);
   }
 }

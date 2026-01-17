@@ -1,10 +1,6 @@
 package com.sundalei.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-public record Config(
-    @JsonProperty("user_id") String userId,
-    @JsonProperty("user_agent") String userAgent,
-    @JsonProperty("x_bc") String xBc,
-    @JsonProperty("sess") String sessionCookie,
-    @JsonProperty("app_token") String appToken) {}
+@ConfigurationProperties(prefix = "app.config")
+public record Config(String userId, String userAgent, String xBc, String sess, String appToken) {}

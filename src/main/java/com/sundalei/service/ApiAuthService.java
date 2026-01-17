@@ -54,7 +54,7 @@ public class ApiAuthService {
     headers.set("User-Agent", config.userAgent());
     headers.set("x-bc", config.xBc());
     headers.set("user-id", config.userId());
-    headers.set("Cookie", "auh_id=" + config.userId() + "; sess=" + config.sessionCookie());
+    headers.set("Cookie", "auh_id=" + config.userId() + "; sess=" + config.sess());
     headers.set("sign", sign);
     headers.set("time", unixtime);
 
