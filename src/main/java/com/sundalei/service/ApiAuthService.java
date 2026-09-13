@@ -50,6 +50,7 @@ public class ApiAuthService {
 
     HttpHeaders headers = new HttpHeaders();
     headers.set(ApiConstants.HEADER_ACCEPT, "application/json, text/plain, */*");
+    headers.set(ApiConstants.HEADER_ACCEPT_ENCODING, "gzip, deflate");
     headers.set(ApiConstants.HEADER_APP_TOKEN, userCredentials.appToken());
     headers.set(ApiConstants.HEADER_USER_AGENT, userCredentials.userAgent());
     headers.set(ApiConstants.HEADER_X_BC, userCredentials.xBcToken());

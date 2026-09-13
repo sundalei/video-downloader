@@ -16,4 +16,5 @@ public final class ApiConstants {
   public static final String HEADER_SIGN = "sign";
   public static final String HEADER_TIME = "time";
   public static final String HEADER_ACCEPT = "Accept";
+  public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 }
