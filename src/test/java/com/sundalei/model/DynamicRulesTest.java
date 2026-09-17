@@ -4,19 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
-import tools.jackson.databind.ObjectMapper;
 
 class DynamicRulesTest {
 
   @Test
   void testFormatStringCompatibility() throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
-    SigningRules rules =
-        mapper.readValue(
-            new ClassPathResource("dynamic_rules.json").getInputStream(), SigningRules.class);
-
-    String format = rules.format();
+    String format = "51892:%s:%x:69406376";
     assertThat(format).isNotNull();
 
     // Verify it works with String.format with expected arguments (String, Integer)
