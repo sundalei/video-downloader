@@ -135,6 +135,7 @@
                 Application configuration and secrets are read from /etc/video-downloader/application.yaml.</description>
               <license>Proprietary</license>
               <group>Applications/Internet</group>
+              <needarch>noarch</needarch>
             </configuration>
             <executions>
               <execution>
