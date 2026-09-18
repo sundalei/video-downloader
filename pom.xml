@@ -136,6 +136,9 @@
               <license>Proprietary</license>
               <group>Applications/Internet</group>
               <needarch>noarch</needarch>
+              <requires>
+                <require>java-21-openjdk-headless</require>
+              </requires>
             </configuration>
             <executions>
               <execution>
