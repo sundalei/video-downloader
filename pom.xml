@@ -138,7 +138,51 @@
               <needarch>noarch</needarch>
               <requires>
                 <require>java-21-openjdk-headless</require>
+                <require>shadow-utils</require>
+                <require>systemd</require>
               </requires>
+              <mappings>
+                <!-- application dir: own it, keep it traversable (dir needs +x) -->
+                <mapping>
+                  <directory>/usr/share/video-downloader</directory>
+                  <filemode>755</filemode>
+                  <username>root</username>
+                  <groupname>root</groupname>
+                  <directoryIncluded>true</directoryIncluded>
+                </mapping>
+                <!-- application (fat) jar (file only; dir owned by the mapping above) -->
+                <mapping>
+                  <directory>/usr/share/video-downloader</directory>
+                  <filemode>644</filemode>
+                  <username>root</username>
+                  <groupname>root</groupname>
+                  <directoryIncluded>false</directoryIncluded>
+                  <sources>
+                    <source>
+                      <location>${project.build.directory}/${project.build.finalName}.jar</location>
+                      <destination>video-downloader.jar</destination>
+                    </source>
+                  </sources>
+                </mapping>
+                <!-- Put just this file into /usr/lib/systemd/system; that folder belongs
+                     to systemd and is shared by many packages, so we package the file only,
+                     not the folder (directoryIncluded=false). -->
+                <mapping>
+                  <directory>/usr/lib/systemd/system</directory>
+                  <filemode>644</filemode>
+                  <username>root</username>
+                  <groupname>root</groupname>
+                  <directoryIncluded>false</directoryIncluded>
+                  <sources>
+                    <source>
+                      <location>src/main/packaging/video-downloader.service</location>
+                    </source>
+                  </sources>
+                </mapping>
+              </mappings>
+              <preinstallScriptlet>
+                <script>echo "hello world"</script>
+              </preinstallScriptlet>
             </configuration>
             <executions>
               <execution>
