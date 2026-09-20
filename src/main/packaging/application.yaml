@@ -1,0 +1,31 @@
+# External configuration for video-downloader.
+# Installed as /etc/video-downloader/application.yaml (mode 0640, root:video-downloader).
+#
+# Values here OVERRIDE the defaults packaged inside the jar, because the service
+# is started with -Dspring.config.additional-location=file:/etc/video-downloader/.
+# Put your real secrets here. This file is marked %config(noreplace), so package
+# upgrades will not overwrite your edits.
+
+server:
+  # The API endpoints have no authentication. Bind to loopback by default so the
+  # service is not exposed on the network. Only set this to 0.0.0.0 when the app
+  # sits behind a trusted reverse proxy or firewall.
+  address: 127.0.0.1
+  port: 8080
+
+app:
+  config:
+    user-id: "YOUR_USER_ID"
+    user-agent: "YOUR_USER_AGENT"
+    x-bc-token: "YOUR_XBC_TOKEN"
+    sess: "YOUR_SESSION_COOKIE"
+    app-token: "YOUR_APP_TOKEN"
+
+  rules:
+    static-param: "YOUR_STATIC_PARAM"
+    checksum-indexes: []
+    checksum-constant: 0
+    format: "YOUR_FORMAT"
+
+  api:
+    base-url: "BASE_URL"

@@ -1,0 +1,25 @@
+# Environment for the video-downloader systemd service.
+# Installed as /etc/sysconfig/video-downloader (edit here, not in the unit file)
+
+# JVM options (one line; EnvironmentFile has no line continuation).
+#
+#    -Xmx1G caps the java heap at 1GB. The service idles around 240MB, so this
+#    is generous headroom while still bounding a runaway. Paired with
+#    -XX:+ExitOnOutOfMemoryError the JVM exits cleanly on heap exhaustion and
+#    system'd Restart=on-failure brings it back, instead of growing until the
+#    kernel OOM-kills something on the host.
+#
+#    Optionally also cap TOTAL process memory (heap plus metaspace, thread stacks, buffers) at
+#    the cgroup level, which survives package upgrades:
+#      sudo systemctl set-property video-downloader MemoryMax=1500M
+#
+#    -Dspring.config.additional-location loads external configuration (secrets)
+#    from /etc/video-downloader/ so it lives outside the jar. 'optional:' lets the
+#    service start even if that file is absent, and the trailing '/' means it is a
+#    directory (spring looks for application.yaml inside it). 'additional-location'
+#    adds to the default search path, so the jar's bundled defaults still apply and
+#    these values override them.
+JAVA_OPTS=-Xmx1G -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/urandom -Dspring.config.additional-location=optional:file:/etc/video-downloader/
+
+# Extra Spring Boot arguments, e.g.: APP_OPTS=--server.port=9090
+APP_OPTS=

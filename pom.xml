@@ -179,10 +179,82 @@
                     </source>
                   </sources>
                 </mapping>
+                <!-- external config dir: own it, traversable by the service group (dir needs +x) -->
+                <mapping>
+                  <directory>/etc/video-downloader</directory>
+                  <filemode>750</filemode>
+                  <username>root</username>
+                  <groupname>video-downloader</groupname>
+                  <directoryIncluded>true</directoryIncluded>
+                </mapping>
+                <!-- external config / secrets, preserved across upgrades (file only) -->
+                <mapping>
+                  <directory>/etc/video-downloader</directory>
+                  <filemode>640</filemode>
+                  <username>root</username>
+                  <groupname>video-downloader</groupname>
+                  <directoryIncluded>false</directoryIncluded>
+                  <!-- noreplace: on upgrade, keep the admin's edited file (the real secrets);
+                       if the shipped template also changed, the new one is written beside it as
+                       application.yaml.rpmnew for optional review, never overwriting the live file. -->
+                  <configuration>noreplace</configuration>
+                  <sources>
+                    <source>
+                      <location>src/main/packaging/application.yaml</location>
+                    </source>
+                  </sources>
+                </mapping>
+                <!-- Put just this file into /etc/sysconfig; that folder belongs to the OS
+                     ('filesystem' package), so we package the file only, not the folder
+                     (directoryIncluded=false). -->
+                <mapping>
+                  <directory>/etc/sysconfig</directory>
+                  <filemode>640</filemode>
+                  <username>root</username>
+                  <groupname>video-downloader</groupname>
+                  <directoryIncluded>false</directoryIncluded>
+                  <!-- noreplace: same as the /etc config above, an upgrade never overwrites
+                       the admin's edited env file. -->
+                  <configuration>noreplace</configuration>
+                  <sources>
+                    <source>
+                      <location>src/main/packaging/video-downloader.sysconfig</location>
+                      <destination>video-downloader</destination>
+                    </source>
+                  </sources>
+                </mapping>
+                <!-- writable working dir (holds posts_retrieval_*.txt) -->
+                <mapping>
+                  <directory>/var/lib/video-downloader</directory>
+                  <filemode>750</filemode>
+                  <username>video-downloader</username>
+                  <groupname>video-downloader</groupname>
+                  <directoryIncluded>true</directoryIncluded>
+                </mapping>
+                <!-- log dir -->
+                <mapping>
+                  <directory>/var/log/video-downloader</directory>
+                  <filemode>750</filemode>
+                  <username>video-downloader</username>
+                  <groupname>video-downloader</groupname>
+                  <directoryIncluded>true</directoryIncluded>
+                </mapping>
               </mappings>
               <preinstallScriptlet>
-                <script>echo "hello world"</script>
+                <script>getent group video-downloader &gt;/dev/null || groupadd -r video-downloader
+getent passwd video-downloader &gt;/dev/null || useradd -r -g video-downloader -d /var/lib/video-downloader -s /sbin/nologin -c "video-downloader service account" video-downloader
+exit 0</script>
               </preinstallScriptlet>
+              <postinstallScriptlet>
+                <script>systemctl daemon-reload &gt;/dev/null 2&gt;&amp;1 || :</script>
+              </postinstallScriptlet>
+              <preremoveScriptlet>
+                <script>if [ "$1" = "0" ]; then systemctl --no-reload disable --now video-downloader.service &gt;/dev/null 2&gt;&amp;1 || :; fi</script>
+              </preremoveScriptlet>
+              <postremoveScriptlet>
+                <script>systemctl daemon-reload &gt;/dev/null 2&gt;&amp;1 || :
+if [ "$1" -ge 1 ]; then systemctl try-restart video-downloader.service &gt;/dev/null 2&gt;&amp;1 || :; fi</script>
+              </postremoveScriptlet>
             </configuration>
             <executions>
               <execution>

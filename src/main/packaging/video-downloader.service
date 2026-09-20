@@ -1,1 +1,44 @@
 [Unit]
+Description=Video Downloader Service
+Documentation=https://github.com/sundalei/video-downloader
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=video-downloader
+Group=video-downloader
+
+# The application writes files to its working directory, so it must be a writeable, service-owned location.
+WorkingDirectory=/var/lib/video-downloader
+
+# JAVA_OPTS, APP_OPTS and SPRING_CONFIG_ADDITIONAL_LOCATION come from here.
+# The leading '-' means the service still starts if the file is missing.
+EnvironmentFile=-/etc/sysconfig/video-downloader
+
+# Unquoted $JAVA_OPTS / $APP_OPTS are split on whitespaces into separate args
+ExecStart=/usr/bin/java $JAVA_OPTS -jar /usr/share/video-downloader/video-downloader.jar $APP_OPTS
+
+# 143 = 128 + SIGTERM(15): a clean shutdown on 'systemctl stop'.
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+
+# --- Hardening ---
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/video-downloader /var/log/video-downloader
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectClock=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=false
+
+[Install]
+WantedBy=multi-user.target
