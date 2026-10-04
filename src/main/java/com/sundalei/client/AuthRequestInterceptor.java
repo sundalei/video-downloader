@@ -35,7 +35,6 @@ public class AuthRequestInterceptor implements RequestInterceptor {
     }
 
     HttpHeaders headers = apiAuthService.createSignedHeaders(path, queryParams);
-    log.info("headers: {}", headers);
     headers.forEach(
         (k, v) -> {
           if (v != null && !v.isEmpty()) {
